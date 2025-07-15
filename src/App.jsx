@@ -1,5 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { Send, Bot, User, Loader2, Database, Sparkles, Moon, Sun, Copy, Check } from 'lucide-react';
+import { WEBHOOK_URL, APP_CONFIG, UI_CONFIG } from './config';
 
 const RAGChatbot = () => {
   const [messages, setMessages] = useState([
@@ -7,17 +8,17 @@ const RAGChatbot = () => {
   ]);
   const [inputMessage, setInputMessage] = useState('');
   const [isLoading, setIsLoading] = useState(false);
-  const [darkMode, setDarkMode] = useState(true);
+  const [darkMode, setDarkMode] = useState(UI_CONFIG.defaultDarkMode);
   const [copiedId, setCopiedId] = useState(null);
   const messagesEndRef = useRef(null);
   const inputRef = useRef(null);
 
   useEffect(() => {
-    document.title = 'RAG Chatbot Pro - Vergi Asistanı | Luwi';
+    document.title = `${APP_CONFIG.appName} - ${APP_CONFIG.appSlogan} | Luwi`;
   }, []);
 
   const scrollToBottom = () => {
-    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+    messagesEndRef.current?.scrollIntoView({ behavior: UI_CONFIG.scrollBehavior });
   };
 
   useEffect(() => {
@@ -32,7 +33,7 @@ const RAGChatbot = () => {
     try {
       await navigator.clipboard.writeText(text);
       setCopiedId(messageId);
-      setTimeout(() => setCopiedId(null), 2000);
+      setTimeout(() => setCopiedId(null), UI_CONFIG.copySuccessTimeout);
     } catch (err) {
       console.error('Kopyalama başarısız:', err);
     }
@@ -53,7 +54,7 @@ const RAGChatbot = () => {
     setIsLoading(true);
 
     try {
-      const response = await fetch('http://n8n.luwi.dev:5678/webhook/rag-chatbot-pro', {
+      const response = await fetch(WEBHOOK_URL, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -95,7 +96,7 @@ const RAGChatbot = () => {
   };
 
   const generateSessionId = () => {
-    const sessionId = `session_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+    const sessionId = `${APP_CONFIG.sessionIdPrefix}_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
     localStorage.setItem('chatSessionId', sessionId);
     return sessionId;
   };
@@ -121,10 +122,10 @@ const RAGChatbot = () => {
               </div>
               <div>
                 <h1 className={`text-xl font-bold ${darkMode ? 'text-white' : 'text-gray-900'}`}>
-                  RAG Chatbot Pro
+                  {APP_CONFIG.appName}
                 </h1>
                 <p className={`text-sm font-medium ${darkMode ? 'text-blue-400' : 'text-blue-600'}`}>
-                  Vergi Asistanı
+                  {APP_CONFIG.appSlogan}
                 </p>
                 <p className={`text-xs ${darkMode ? 'text-gray-400' : 'text-gray-600'} flex items-center gap-1 mt-1`}>
                   <Database className="w-3 h-3" />
@@ -254,6 +255,7 @@ const RAGChatbot = () => {
                 }`}
                 rows="1"
                 style={{ minHeight: '48px', maxHeight: '120px' }}
+                maxLength={UI_CONFIG.maxMessageLength}
               />
               <button
                 onClick={sendMessage}
