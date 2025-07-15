@@ -11,6 +11,12 @@
 
 RAG Chatbot Pro, n8n workflow otomasyonu ve PostgreSQL Vector Store ile güçlendirilmiş, modern ve kullanıcı dostu bir vergi asistanı chatbot'udur. Vergi ile ilgili sorularınıza hızlı ve doğru yanıtlar sunar.
 
+## 🔗 Production Webhook
+
+```
+http://n8n.luwi.dev:5678/webhook/rag-chatbot-pro
+```
+
 ## ✨ Özellikler
 
 ### 🎨 Modern Arayüz
@@ -53,14 +59,20 @@ npm install
 yarn install
 ```
 
-3. **Geliştirme sunucusunu başlatın**
+3. **Environment variables oluşturun** (opsiyonel)
+```bash
+cp .env.example .env
+# .env dosyasını düzenleyin
+```
+
+4. **Geliştirme sunucusunu başlatın**
 ```bash
 npm run dev
 # veya
 yarn dev
 ```
 
-4. **Production build**
+5. **Production build**
 ```bash
 npm run build
 # veya
@@ -69,13 +81,18 @@ yarn build
 
 ## 🔧 Konfigürasyon
 
-### Webhook URL
-Webhook URL'sini değiştirmek için `src/App.jsx` dosyasında:
-```javascript
-const response = await fetch('http://n8n.luwi.dev:5678/webhook/rag-chatbot-pro', {
-  // Kendi webhook URL'nizi buraya yazın
-});
+### Environment Variables
+`.env` dosyası oluşturun:
+```env
+VITE_WEBHOOK_URL=http://n8n.luwi.dev:5678/webhook/rag-chatbot-pro
 ```
+
+### Config Dosyası
+`src/config.js` dosyasında uygulama ayarlarını özelleştirebilirsiniz:
+- Webhook URL
+- Session timeout
+- UI ayarları
+- Model parametreleri
 
 ### Webhook Payload
 Chatbot şu formatta veri gönderir:
@@ -95,9 +112,17 @@ Chatbot şu formatta veri gönderir:
 
 [![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https://github.com/umutluwi/rag-chatbot-vergi-asistani)
 
+**Environment Variables ekleyin:**
+- `VITE_WEBHOOK_URL`: `http://n8n.luwi.dev:5678/webhook/rag-chatbot-pro`
+
 ### Netlify ile Deploy
 
 [![Deploy to Netlify](https://www.netlify.com/img/deploy/button.svg)](https://app.netlify.com/start/deploy?repository=https://github.com/umutluwi/rag-chatbot-vergi-asistani)
+
+**Build Settings:**
+- Build command: `npm run build`
+- Publish directory: `dist`
+- Environment variables: `VITE_WEBHOOK_URL`
 
 ### Manuel Deploy
 
@@ -106,11 +131,34 @@ Chatbot şu formatta veri gönderir:
 
 ## 📡 n8n Workflow Entegrasyonu
 
-1. n8n'de bir Webhook node oluşturun
-2. HTTP Method: POST
-3. Path: `/webhook/rag-chatbot-pro`
-4. Response Mode: "On Last Node"
-5. Gelen veriyi işleyin ve yanıt döndürün
+### Webhook Node Ayarları
+1. HTTP Method: **POST**
+2. Path: `/webhook/rag-chatbot-pro`
+3. Response Mode: **"On Last Node"**
+4. Response Headers:
+   - `Access-Control-Allow-Origin: *`
+   - `Access-Control-Allow-Methods: POST, OPTIONS`
+   - `Access-Control-Allow-Headers: Content-Type`
+
+### Workflow Özellikleri
+- **AI Agent**: GPT-4o-mini model
+- **Vector Store**: PostgreSQL pgvector
+- **Chat Memory**: 15 mesaj geçmişi
+- **SQL Tools**: 4 vergi tablosu desteği
+  - `danistaykararlari`
+  - `sorucevap`
+  - `ozelgeler`
+  - `makaleler`
+
+## 🔒 CORS ve HTTPS
+
+### Mixed Content Hatası
+Eğer frontend HTTPS üzerindeyse:
+1. n8n'i HTTPS'e geçirin (önerilir)
+2. Cloudflare proxy kullanın
+3. Nginx reverse proxy kurun
+
+Detaylı bilgi için: [`docs/DEPLOYMENT.md`](./docs/DEPLOYMENT.md)
 
 ## 🤝 Katkıda Bulunma
 
